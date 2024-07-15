@@ -1,3 +1,4 @@
+// ["App", "Component"]    
 import MainLayout_Component from "./MainLayout_Component";
 import { Provider } from "react-redux";
 import store from "./ReduxStore_Store";
