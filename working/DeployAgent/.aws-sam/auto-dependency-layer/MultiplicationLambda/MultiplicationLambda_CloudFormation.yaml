@@ -1,0 +1,39 @@
+# Outputs for the lambda function
+Outputs:
+  MultiplicationLambdaUrl:
+    Description: The HTTP API Gateway url for the created lambda
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+
+# HTTP API to expose the lambda function to the internet with no authentication
+HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - "*"
+        AllowMethods:
+          - "*"
+        ExposeHeaders:
+          - X-Total-Count
+      FailOnWarnings: true
+
+MultiplicationLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-MultiplicationLambda
+      Description: !Sub
+        - Stack ${AWS::StackName} Function ${ResourceName}
+        - ResourceName: MultiplicationLambda
+      CodeUri: ../../working/MultiplicationLambda
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Events:
+        HttpApiGET:
+          Type: HttpApi
+          Properties:
+            Path: /MultiplicationLambda
+            Method: GET
+            ApiId: !Ref HttpApi
+# Add additional events or edit this one as required

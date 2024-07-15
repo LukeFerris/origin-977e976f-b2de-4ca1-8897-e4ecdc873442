@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+        - '*'
+        AllowHeaders:
+        - '*'
+        AllowMethods:
+        - '*'
+        ExposeHeaders:
+        - X-Total-Count
+      FailOnWarnings: true
+  MultiplicationLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-MultiplicationLambda
+      Description:
+        Fn::Sub:
+        - Stack ${AWS::StackName} Function ${ResourceName}
+        - ResourceName: MultiplicationLambda
+      CodeUri: MultiplicationLambda
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Events:
+        HttpApiGET:
+          Type: HttpApi
+          Properties:
+            Path: /MultiplicationLambda
+            Method: GET
+            ApiId:
+              Ref: HttpApi
+      Layers:
+      - Fn::GetAtt:
+        - AwsSamAutoDependencyLayerNestedStack
+        - Outputs.MultiplicationLambda6da1130eDepLayer
+    Metadata:
+      SamResourceId: MultiplicationLambda
+  AwsSamAutoDependencyLayerNestedStack:
+    DeletionPolicy: Delete
+    Metadata:
+      CreatedBy: AWS SAM CLI sync command
+    Properties:
+      TemplateURL: /Users/lukeferris/Documents/code/origin/api/incubator/origin-d5ca9916-e5c6-4871-bca5-f10f50bd369d/working/DeployAgent/.aws-sam/auto-dependency-layer/adl_nested_template.yaml
+    Type: AWS::CloudFormation::Stack
+Outputs:
+  MultiplicationLambdaUrl:
+    Description: The HTTP API Gateway url for the created lambda
+    Value:
+      Fn::Sub: https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
