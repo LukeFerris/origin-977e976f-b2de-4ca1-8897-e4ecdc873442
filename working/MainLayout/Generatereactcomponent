@@ -1,5 +1,6 @@
-// ["MainLayout", "Component"]    
 
+
+// ["MainLayout", "Component"]    
 
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -28,7 +29,7 @@ export default function MainLayout_Component() {
           <Route
             path="/"
             element={
-              <div className="container mx-auto px-4 py-8">
+              <div className="container mx-auto px-4 py-8 flex flex-col items-center">
                 <button
                   onClick={handleStartNewDeal}
                   className="mb-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
