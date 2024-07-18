@@ -124,6 +124,8 @@ Resources:
               properties:
                 id:
                   type: string
+                clientName:
+                  type: string
                 startDate:
                   type: string
                   format: date
@@ -132,11 +134,14 @@ Resources:
                   format: date
               required:
               - id
+              - clientName
               - startDate
               - endDate
             DealInput:
               type: object
               properties:
+                clientName:
+                  type: string
                 startDate:
                   type: string
                   format: date
@@ -144,6 +149,7 @@ Resources:
                   type: string
                   format: date
               required:
+              - clientName
               - startDate
               - endDate
   DealAPITable:

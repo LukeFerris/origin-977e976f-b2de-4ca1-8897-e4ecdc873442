@@ -1,10 +1,8 @@
 // ["DealSlice", "Store"]    
-
+// IMPORTANT: The store key for this slice is guaranteed to be dealState. You should use this when accessing state related to this slice e.g. state.dealState.
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-// IMPORTANT: The store key for this slice is guaranteed to be dealState. You should use this when accessing state related to this slice e.g. state.dealState.
 
 const API_URL = import.meta.env.VITE_DealAPIUrl;
 
@@ -23,6 +21,9 @@ export const fetchDeals = createAsyncThunk(
 );
 
 function validateDeal(deal) {
+  if (!deal.clientName || typeof deal.clientName !== 'string' || deal.clientName.trim() === '') {
+    return "Client name must be a non-empty string";
+  }
   if (!deal.startDate || !(deal.startDate instanceof Date)) {
     return "Deal start date must be a valid Date";
   }
@@ -32,7 +33,7 @@ function validateDeal(deal) {
 }
 
 // Async thunk for creating a new deal
-// newDeal: { startDate: Date, endDate: Date }
+// newDeal: { clientName: string, startDate: Date, endDate: Date }
 export const createDeal = createAsyncThunk(
   "deals/createDeal",
   async (newDeal, { rejectWithValue }) => {
@@ -42,7 +43,11 @@ export const createDeal = createAsyncThunk(
         return rejectWithValue(validationError);
       }
 
-      const response = await axios.post(`${API_URL}/deals`, newDeal, {
+      const response = await axios.post(`${API_URL}/deals`, {
+        clientName: newDeal.clientName,
+        startDate: newDeal.startDate.toISOString().split('T')[0],
+        endDate: newDeal.endDate.toISOString().split('T')[0]
+      }, {
         headers: { "Content-Type": "application/json" },
       });
       return response.data;
@@ -63,6 +68,7 @@ export const setDealFormVisibility = createAsyncThunk(
 );
 
 // Async thunk for initializing the deal slice
+// No input parameters
 export const initializeDealSlice = createAsyncThunk(
   "deals/initializeDealSlice",
   async (_, { dispatch }) => {

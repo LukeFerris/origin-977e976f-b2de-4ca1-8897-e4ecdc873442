@@ -1,5 +1,6 @@
-// ["DealForm", "Component"]    
 
+
+// ["DealForm", "Component"]    
 
 import React, { useRef } from 'react';
 import { Dialog } from '@headlessui/react';
@@ -10,13 +11,23 @@ export default function DealForm_Component() {
   const dispatch = useDispatch();
   const isVisible = useSelector(state => state.dealState.dealFormVisible);
   
+  // Add new ref for client name
+  const clientNameRef = useRef(null);
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Get client name value
+    const clientName = clientNameRef.current.value;
     const startDate = new Date(startDateRef.current.value);
     const endDate = new Date(endDateRef.current.value);
+
+    // Validate client name
+    if (!clientName.trim()) {
+      alert('Please enter a client name');
+      return;
+    }
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       alert('Please enter valid dates');
@@ -28,7 +39,8 @@ export default function DealForm_Component() {
       return;
     }
 
-    dispatch(createDeal({ startDate, endDate }));
+    // Include client name in createDeal dispatch
+    dispatch(createDeal({ clientName, startDate, endDate }));
     dispatch(setDealFormVisibility(false));
   };
 
@@ -43,6 +55,20 @@ export default function DealForm_Component() {
         <Dialog.Panel className="w-full max-w-sm rounded bg-white p-6 shadow-xl">
           <Dialog.Title className="text-lg font-medium leading-6 text-gray-900 mb-4">Create New Deal</Dialog.Title>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* New client name input field */}
+            <div>
+              <label htmlFor="clientName" className="block text-sm font-medium text-gray-700">
+                Name of Client
+              </label>
+              <input
+                type="text"
+                id="clientName"
+                ref={clientNameRef}
+                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                aria-label="Enter the name of the client for the new deal"
+              />
+            </div>
             <div>
               <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                 Start Date
@@ -81,7 +107,7 @@ export default function DealForm_Component() {
               <button
                 type="submit"
                 className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                aria-label="Create a new deal with the entered start and end dates"
+                aria-label="Create a new deal with the entered client name, start date, and end date"
               >
                 Create
               </button>

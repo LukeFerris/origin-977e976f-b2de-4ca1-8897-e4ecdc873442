@@ -19,7 +19,11 @@ export async function handler(event, context) {
     const httpMethod = event.requestContext.http.method;
 
     if (httpMethod === "POST") {
-      const { startDate, endDate } = JSON.parse(event.body);
+      const { clientName, startDate, endDate } = JSON.parse(event.body);
+
+      if (!clientName || clientName.trim() === "") {
+        return errorResponse(400, "Client name is required and cannot be empty.");
+      }
 
       if (!isValidDate(startDate) || !isValidDate(endDate)) {
         return errorResponse(400, "Invalid date format. Use YYYY-MM-DD.");
@@ -35,13 +39,14 @@ export async function handler(event, context) {
           TableName: tableName,
           Item: {
             id: { S: id },
+            clientName: { S: clientName },
             startDate: { S: startDate },
             endDate: { S: endDate },
           },
         })
       );
 
-      return successResponse(201, { id, startDate, endDate });
+      return successResponse(201, { id, clientName, startDate, endDate });
     } else if (httpMethod === "GET") {
       const { id } = event.pathParameters || {};
 
@@ -59,6 +64,7 @@ export async function handler(event, context) {
 
         return successResponse(200, {
           id: result.Item.id.S,
+          clientName: result.Item.clientName.S,
           startDate: result.Item.startDate.S,
           endDate: result.Item.endDate.S,
         });
@@ -69,6 +75,7 @@ export async function handler(event, context) {
 
         const items = result.Items.map((item) => ({
           id: item.id.S,
+          clientName: item.clientName.S,
           startDate: item.startDate.S,
           endDate: item.endDate.S,
         }));
@@ -77,10 +84,14 @@ export async function handler(event, context) {
       }
     } else if (httpMethod === "PUT") {
       const { id } = event.pathParameters || {};
-      const { startDate, endDate } = JSON.parse(event.body);
+      const { clientName, startDate, endDate } = JSON.parse(event.body);
 
       if (!id) {
         return errorResponse(400, "Deal ID is required");
+      }
+
+      if (!clientName || clientName.trim() === "") {
+        return errorResponse(400, "Client name is required and cannot be empty.");
       }
 
       if (!isValidDate(startDate) || !isValidDate(endDate)) {
@@ -95,8 +106,9 @@ export async function handler(event, context) {
         new UpdateItemCommand({
           TableName: tableName,
           Key: { id: { S: id } },
-          UpdateExpression: "SET startDate = :startDate, endDate = :endDate",
+          UpdateExpression: "SET clientName = :clientName, startDate = :startDate, endDate = :endDate",
           ExpressionAttributeValues: {
+            ":clientName": { S: clientName },
             ":startDate": { S: startDate },
             ":endDate": { S: endDate },
           },
@@ -110,6 +122,7 @@ export async function handler(event, context) {
 
       return successResponse(200, {
         id: result.Attributes.id.S,
+        clientName: result.Attributes.clientName.S,
         startDate: result.Attributes.startDate.S,
         endDate: result.Attributes.endDate.S,
       });

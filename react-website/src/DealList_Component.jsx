@@ -20,7 +20,10 @@ export default function DealList_Component() {
         <ul className="space-y-4">
           {deals.map((deal) => (
             <li key={deal.id} className="bg-white shadow rounded-lg p-4">
-              <div className="flex flex-col sm:flex-row justify-between">
+              <div className="mb-2">
+                <span className="font-semibold text-lg text-gray-800">{deal.clientName}</span>
+              </div>
+              <div className="flex flex-col sm:flex-row justify-between text-sm">
                 <div className="mb-2 sm:mb-0">
                   <span className="font-semibold text-gray-700">Start Date:</span>{' '}
                   <span className="text-gray-600">{formatDate(deal.startDate)}</span>
@@ -35,7 +38,7 @@ export default function DealList_Component() {
         </ul>
       ) : (
         <div className="text-center text-gray-500 py-8">
-          No deals available at the moment. Check back later for exciting offers!
+          No deals available at the moment. Create a new deal to get started!
         </div>
       )}
     </div>
