@@ -1,22 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: AWS SAM CLI Nested Stack for Auto Dependency Layer Creation
 Metadata:
-  SamCliInfo: 1.79.0
+  SamCliInfo: 1.120.0
   key: AWS SAM CLI sync command
 Outputs:
-  MultiplicationLambda6da1130eDepLayer:
+  DealAPI501f1e6dDepLayer:
     Value:
-      Ref: MultiplicationLambda6da1130eDepLayer
+      Ref: DealAPI501f1e6dDepLayer
 Resources:
-  MultiplicationLambda6da1130eDepLayer:
+  DealAPI501f1e6dDepLayer:
     Metadata:
       CreatedBy: AWS SAM CLI sync command
     Properties:
       CompatibleRuntimes:
       - nodejs18.x
-      ContentUri: /Users/lukeferris/Documents/code/origin/api/incubator/origin-d5ca9916-e5c6-4871-bca5-f10f50bd369d/working/DeployAgent/.aws-sam/auto-dependency-layer/MultiplicationLambda6da1130eDepLayer
-      Description: Auto created layer for dependencies of function MultiplicationLambda
-      LayerName: o-968129161dc1ae32-MultiplicationLambda6da1130e-DepLayer
+      ContentUri: /origin-977e976f-b2de-4ca1-8897-e4ecdc873442/working/DeployAgent/.aws-sam/auto-dependency-layer/DealAPI501f1e6dDepLayer
+      Description: Auto created layer for dependencies of function DealAPI
+      LayerName: o-49cf1bc1-dev4d5ec902-DealAPI501f1e6d-DepLayer
       RetentionPolicy: Delete
     Type: AWS::Serverless::LayerVersion
 Transform: AWS::Serverless-2016-10-31

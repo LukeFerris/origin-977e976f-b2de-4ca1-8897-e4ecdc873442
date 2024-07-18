@@ -1,26 +1,46 @@
 // ["MainLayout", "Component"]    
 
 
-import React from "react";
-
-// IMPORTANT DO NOT CHANGE
-// This page uses react-router V6 which does not have Switch
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-// END IMPORTANT
+import DealList from "./DealList_Component";
+import DealForm from "./DealForm_Component";
+import { fetchDeals, setDealFormVisibility } from "./DealSlice_Store";
 
-// This page is currently used to provide structure and layout to the overall site
 export default function MainLayout_Component() {
-  // Blank white page component
-  const BlankPage = () => (
-    <div className="w-screen h-screen bg-white"></div>
-  );
+  const dispatch = useDispatch();
+
+  // Fetch deals on component mount
+  useEffect(() => {
+    dispatch(fetchDeals());
+  }, [dispatch]);
+
+  // Handler for 'Start a New Deal' button
+  const handleStartNewDeal = () => {
+    dispatch(setDealFormVisibility(true));
+  };
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-white">
         <Routes>
-          {/* Home route rendering the blank white page */}
-          <Route path="/" element={<BlankPage />} />
+          <Route
+            path="/"
+            element={
+              <div className="container mx-auto px-4 py-8">
+                <button
+                  onClick={handleStartNewDeal}
+                  className="mb-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                  aria-label="Start a new deal by opening the deal creation form"
+                >
+                  Start a New Deal
+                </button>
+                <DealForm />
+                <DealList />
+              </div>
+            }
+          />
         </Routes>
       </div>
     </BrowserRouter>

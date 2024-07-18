@@ -1,0 +1,327 @@
+// ["DealAPI", "CloudFormation"]    
+
+
+{
+  "Outputs": {
+    "DealAPIUrl": {
+      "Description": "The HTTP API Gateway url for the created lambda",
+      "Value": {
+        "Fn::Sub": "https://${DealAPIHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+      }
+    }
+  },
+  "Resources": {
+    "DealAPIHttpApi": {
+      "Type": "AWS::Serverless::HttpApi",
+      "Properties": {
+        "CorsConfiguration": {
+          "AllowOrigins": ["*"],
+          "AllowHeaders": ["*"],
+          "AllowMethods": ["*"],
+          "ExposeHeaders": ["X-Total-Count"]
+        },
+        "FailOnWarnings": true,
+        "DefinitionBody": {
+          "openapi": "3.0.0",
+          "info": {
+            "title": "DealAPI",
+            "description": "Accessible via the server url provided in the front end environment variable: VITE_DealAPIUrl. An API for managing deal data operations with DynamoDB integration.",
+            "version": "1.0.0"
+          },
+          "servers": [
+            {
+              "url": "{VITE_DealAPIUrl}",
+              "description": "API Gateway endpoint"
+            }
+          ],
+          "x-amazon-apigateway-request-validators": {
+            "full": {
+              "validateRequestBody": true,
+              "validateRequestParameters": true
+            }
+          },
+          "x-amazon-apigateway-request-validator": "full",
+          "paths": {
+            "/deals": {
+              "get": {
+                "summary": "Get all deals",
+                "responses": {
+                  "200": {
+                    "description": "Successful response",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Deal"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "post": {
+                "summary": "Create a new deal",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/DealInput"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "201": {
+                    "description": "Successfully created",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Deal"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "/deals/{id}": {
+              "get": {
+                "summary": "Get a specific deal",
+                "parameters": [
+                  {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Successful response",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Deal"
+                        }
+                      }
+                    }
+                  },
+                  "404": {
+                    "description": "Deal not found"
+                  }
+                }
+              },
+              "put": {
+                "summary": "Update a deal",
+                "parameters": [
+                  {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/DealInput"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "Successfully updated",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Deal"
+                        }
+                      }
+                    }
+                  },
+                  "404": {
+                    "description": "Deal not found"
+                  }
+                }
+              },
+              "delete": {
+                "summary": "Delete a deal",
+                "parameters": [
+                  {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "responses": {
+                  "204": {
+                    "description": "Successfully deleted"
+                  },
+                  "404": {
+                    "description": "Deal not found"
+                  }
+                }
+              }
+            }
+          },
+          "components": {
+            "schemas": {
+              "Deal": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": ["id", "startDate", "endDate"]
+              },
+              "DealInput": {
+                "type": "object",
+                "properties": {
+                  "startDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": ["startDate", "endDate"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "DealAPITable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "BillingMode": "PAY_PER_REQUEST",
+        "TableName": {
+          "Fn::Sub": "${AWS::StackName}-DealAPI"
+        },
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ]
+      }
+    },
+    "DealAPI": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-DealAPI"
+        },
+        "Description": {
+          "Fn::Sub": [
+            "Stack ${AWS::StackName} Function ${ResourceName}",
+            {
+              "ResourceName": "DealAPI"
+            }
+          ]
+        },
+        "CodeUri": "../../working/DealAPI",
+        "Handler": "index.handler",
+        "Runtime": "nodejs18.x",
+        "Events": {
+          "HttpApiGET": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/deals/{id}",
+              "Method": "GET",
+              "ApiId": {
+                "Ref": "DealAPIHttpApi"
+              }
+            }
+          },
+          "HttpApiGETMultiple": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/deals",
+              "Method": "GET",
+              "ApiId": {
+                "Ref": "DealAPIHttpApi"
+              }
+            }
+          },
+          "HttpApiPUT": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/deals/{id}",
+              "Method": "PUT",
+              "ApiId": {
+                "Ref": "DealAPIHttpApi"
+              }
+            }
+          },
+          "HttpApiPOST": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/deals",
+              "Method": "POST",
+              "ApiId": {
+                "Ref": "DealAPIHttpApi"
+              }
+            }
+          },
+          "HttpApiDELETE": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/deals/{id}",
+              "Method": "DELETE",
+              "ApiId": {
+                "Ref": "DealAPIHttpApi"
+              }
+            }
+          }
+        },
+        "Policies": [
+          {
+            "DynamoDBCrudPolicy": {
+              "TableName": {
+                "Ref": "DealAPITable"
+              }
+            }
+          }
+        ],
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": {
+              "Ref": "DealAPITable"
+            }
+          }
+        }
+      }
+    }
+  }
+}
