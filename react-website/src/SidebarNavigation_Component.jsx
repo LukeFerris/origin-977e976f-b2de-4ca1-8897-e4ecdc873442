@@ -1,6 +1,5 @@
 // ["SidebarNavigation", "Component"]    
 
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { HomeIcon, FolderOpenIcon, UsersIcon, ChatBubbleLeftRightIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
@@ -18,8 +17,11 @@ export default function SidebarNavigation_Component() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-gray-100 h-screen w-1/5 fixed left-0 top-0 transition-all duration-300 ease-in-out lg:translate-x-0 overflow-y-auto"
-         style={{ transform: isOpen ? 'translateX(0)' : 'translateX(-100%)' }}>
+    <nav 
+      className="bg-[#F1F1F1] h-screen w-1/5 fixed left-0 top-0 transition-all duration-300 ease-in-out lg:translate-x-0 overflow-y-auto"
+      style={{ transform: isOpen ? 'translateX(0)' : 'translateX(-100%)' }}
+      aria-label="Main navigation"
+    >
       <div className="px-4 py-6">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">BlankSlateCanvas</h2>
         <ul>
@@ -32,8 +34,9 @@ export default function SidebarNavigation_Component() {
                     ? 'bg-blue-500 text-white'
                     : 'text-gray-700 hover:bg-gray-200'
                   }`}
+                aria-current={location.pathname === item.href ? 'page' : undefined}
               >
-                <item.icon className="h-6 w-6 mr-3" />
+                <item.icon className="h-6 w-6 mr-3" aria-hidden="true" />
                 {item.name}
               </Link>
             </li>
@@ -44,6 +47,7 @@ export default function SidebarNavigation_Component() {
         className="lg:hidden fixed top-4 left-4 z-20 p-2 rounded-md bg-gray-200 text-gray-700"
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={isOpen}
       >
         {isOpen ? 'Close' : 'Menu'}
       </button>
