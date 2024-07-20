@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import SidebarNavigation from "./SidebarNavigation_Component";
 import ContentArea from "./ContentArea_Component";
 import DealForm from "./DealForm_Component";
-import DealList from "./DealList_Component";
+import DataRoomUpload from "./DataRoomUpload_Component";
 
 export default function MainLayout_Component() {
   return (
@@ -18,19 +18,22 @@ export default function MainLayout_Component() {
           <SidebarNavigation />
         </div>
 
-        {/* Right column: ContentArea and DealList */}
+        {/* Right column: ContentArea */}
         <div className="w-full md:w-4/5 md:ml-[20%] overflow-y-auto transition-all duration-300 ease-in-out">
           <Routes>
             <Route path="/" element={<ContentArea />} />
-            <Route path="/data-room" element={<ContentArea />} />
+            <Route path="/data-room" element={
+              <>
+                <ContentArea />
+                <DataRoomUpload />
+              </>
+            } />
             <Route path="/users-list" element={<ContentArea />} />
             <Route path="/data-chat" element={<ContentArea />} />
             <Route path="/faq" element={<ContentArea />} />
             <Route path="/create-deal" element={<DealForm />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-          {/* DealList component added to display existing deals */}
-          <DealList />
         </div>
       </div>
     </Router>
