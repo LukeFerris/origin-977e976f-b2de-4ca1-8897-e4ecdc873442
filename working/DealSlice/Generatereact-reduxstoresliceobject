@@ -1,4 +1,6 @@
 // ["DealSlice", "Store"]    
+
+
 // IMPORTANT: The store key for this slice is guaranteed to be dealState. You should use this when accessing state related to this slice e.g. state.dealState.
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
@@ -21,26 +23,38 @@ export const fetchDeals = createAsyncThunk(
 );
 
 function validateDeal(deal) {
+  const errors = {};
   if (!deal.clientName || typeof deal.clientName !== 'string' || deal.clientName.trim() === '') {
-    return "Client name must be a non-empty string";
+    errors.clientName = false;
   }
   if (!deal.startDate || !(deal.startDate instanceof Date)) {
-    return "Deal start date must be a valid Date";
+    errors.startDate = false;
   }
   if (!deal.endDate || !(deal.endDate instanceof Date)) {
-    return "Deal end date must be a valid Date";
+    errors.endDate = false;
   }
+  return errors;
 }
+
+// Async thunk for validating form data
+// formData: { clientName: string, startDate: Date, endDate: Date }
+export const validateForm = createAsyncThunk(
+  "deals/validateForm",
+  async (formData) => {
+    const validationResult = validateDeal(formData);
+    return validationResult;
+  }
+);
 
 // Async thunk for creating a new deal
 // newDeal: { clientName: string, startDate: Date, endDate: Date }
 export const createDeal = createAsyncThunk(
   "deals/createDeal",
-  async (newDeal, { rejectWithValue }) => {
+  async (newDeal, { dispatch, rejectWithValue }) => {
     try {
-      const validationError = validateDeal(newDeal);
-      if (validationError) {
-        return rejectWithValue(validationError);
+      const validationResult = await dispatch(validateForm(newDeal)).unwrap();
+      if (Object.values(validationResult).some(value => value === false)) {
+        return rejectWithValue("Validation failed");
       }
 
       const response = await axios.post(`${API_URL}/deals`, {
@@ -79,6 +93,11 @@ export const initializeDealSlice = createAsyncThunk(
 const initialState = {
   deals: [],
   dealFormVisible: false,
+  formValidation: {
+    clientName: true,
+    startDate: true,
+    endDate: true
+  },
   loading: false,
   error: null,
 };
@@ -108,6 +127,11 @@ const dealSlice = createSlice({
       .addCase(createDeal.fulfilled, (state, action) => {
         state.loading = false;
         state.deals.push(action.payload);
+        state.formValidation = {
+          clientName: true,
+          startDate: true,
+          endDate: true
+        };
       })
       .addCase(createDeal.rejected, (state, action) => {
         state.loading = false;
@@ -118,6 +142,12 @@ const dealSlice = createSlice({
       })
       .addCase(initializeDealSlice.fulfilled, (state) => {
         // No additional state changes needed here
+      })
+      .addCase(validateForm.fulfilled, (state, action) => {
+        state.formValidation = {
+          ...state.formValidation,
+          ...action.payload
+        };
       });
   },
 });

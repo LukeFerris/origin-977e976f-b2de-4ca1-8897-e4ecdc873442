@@ -1,49 +1,43 @@
-
-
 // ["DealForm", "Component"]    
+
 
 import React, { useRef } from 'react';
 import { Dialog } from '@headlessui/react';
 import { useDispatch, useSelector } from "react-redux";
-import { createDeal, setDealFormVisibility } from "./DealSlice_Store";
+import { createDeal, setDealFormVisibility, validateForm } from "./DealSlice_Store";
 
 export default function DealForm_Component() {
   const dispatch = useDispatch();
   const isVisible = useSelector(state => state.dealState.dealFormVisible);
+  const formValidation = useSelector(state => state.dealState.formValidation);
   
-  // Add new ref for client name
+  // Refs for form inputs
   const clientNameRef = useRef(null);
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Get client name value
+    
+    // Get form values
     const clientName = clientNameRef.current.value;
     const startDate = new Date(startDateRef.current.value);
     const endDate = new Date(endDateRef.current.value);
 
-    // Validate client name
-    if (!clientName.trim()) {
-      alert('Please enter a client name');
-      return;
-    }
+    // Dispatch validation action
+    const validationResult = await dispatch(validateForm({ clientName, startDate, endDate })).unwrap();
 
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      alert('Please enter valid dates');
-      return;
+    // Check if form is valid
+    if (Object.values(validationResult).every(value => value === true)) {
+      // If valid, create deal
+      dispatch(createDeal({ clientName, startDate, endDate }));
+      dispatch(setDealFormVisibility(false));
     }
-
-    if (endDate <= startDate) {
-      alert('End date must be after start date');
-      return;
-    }
-
-    // Include client name in createDeal dispatch
-    dispatch(createDeal({ clientName, startDate, endDate }));
-    dispatch(setDealFormVisibility(false));
+    // If invalid, errors will be displayed via formValidation state
   };
 
+  // Handle form cancellation
   const handleCancel = () => {
     dispatch(setDealFormVisibility(false));
   };
@@ -55,7 +49,7 @@ export default function DealForm_Component() {
         <Dialog.Panel className="w-full max-w-sm rounded bg-white p-6 shadow-xl">
           <Dialog.Title className="text-lg font-medium leading-6 text-gray-900 mb-4">Create New Deal</Dialog.Title>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* New client name input field */}
+            {/* Client Name input */}
             <div>
               <label htmlFor="clientName" className="block text-sm font-medium text-gray-700">
                 Name of Client
@@ -64,11 +58,13 @@ export default function DealForm_Component() {
                 type="text"
                 id="clientName"
                 ref={clientNameRef}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${!formValidation.clientName ? 'border-red-500' : ''}`}
                 aria-label="Enter the name of the client for the new deal"
               />
+              {!formValidation.clientName && <p className="mt-2 text-sm text-red-600">Please enter a valid client name.</p>}
             </div>
+            
+            {/* Start Date input */}
             <div>
               <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                 Start Date
@@ -77,11 +73,13 @@ export default function DealForm_Component() {
                 type="date"
                 id="startDate"
                 ref={startDateRef}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${!formValidation.startDate ? 'border-red-500' : ''}`}
                 aria-label="Select the start date for the deal"
               />
+              {!formValidation.startDate && <p className="mt-2 text-sm text-red-600">Please enter a valid start date.</p>}
             </div>
+            
+            {/* End Date input */}
             <div>
               <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                 End Date
@@ -90,11 +88,13 @@ export default function DealForm_Component() {
                 type="date"
                 id="endDate"
                 ref={endDateRef}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${!formValidation.endDate ? 'border-red-500' : ''}`}
                 aria-label="Select the end date for the deal"
               />
+              {!formValidation.endDate && <p className="mt-2 text-sm text-red-600">Please enter a valid end date.</p>}
             </div>
+            
+            {/* Form buttons */}
             <div className="flex justify-end space-x-3 mt-4">
               <button
                 type="button"
