@@ -29,7 +29,7 @@ export default function DealForm_Component() {
     const validationResult = await dispatch(validateForm({ clientName, startDate, endDate })).unwrap();
 
     // Check if form is valid
-    if (Object.values(validationResult).every(value => value === true)) {
+    if (Object.values(validationResult).every(value => value === null)) {
       // If valid, create deal
       dispatch(createDeal({ clientName, startDate, endDate }));
       dispatch(setDealFormVisibility(false));
@@ -58,10 +58,10 @@ export default function DealForm_Component() {
                 type="text"
                 id="clientName"
                 ref={clientNameRef}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${!formValidation.clientName ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${formValidation.clientName ? 'border-red-500' : ''}`}
                 aria-label="Enter the name of the client for the new deal"
               />
-              {!formValidation.clientName && <p className="mt-2 text-sm text-red-600">Please enter a valid client name.</p>}
+              {formValidation.clientName && <p className="mt-2 text-sm text-red-600">{formValidation.clientName}</p>}
             </div>
             
             {/* Start Date input */}
@@ -73,10 +73,10 @@ export default function DealForm_Component() {
                 type="date"
                 id="startDate"
                 ref={startDateRef}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${!formValidation.startDate ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${formValidation.startDate ? 'border-red-500' : ''}`}
                 aria-label="Select the start date for the deal"
               />
-              {!formValidation.startDate && <p className="mt-2 text-sm text-red-600">Please enter a valid start date.</p>}
+              {formValidation.startDate && <p className="mt-2 text-sm text-red-600">{formValidation.startDate}</p>}
             </div>
             
             {/* End Date input */}
@@ -88,14 +88,21 @@ export default function DealForm_Component() {
                 type="date"
                 id="endDate"
                 ref={endDateRef}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${!formValidation.endDate ? 'border-red-500' : ''}`}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${formValidation.endDate ? 'border-red-500' : ''}`}
                 aria-label="Select the end date for the deal"
               />
-              {!formValidation.endDate && <p className="mt-2 text-sm text-red-600">Please enter a valid end date.</p>}
+              {formValidation.endDate && <p className="mt-2 text-sm text-red-600">{formValidation.endDate}</p>}
             </div>
             
             {/* Form buttons */}
             <div className="flex justify-end space-x-3 mt-4">
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                aria-label="Create a new deal with the entered client name, start date, and end date"
+              >
+                Create
+              </button>
               <button
                 type="button"
                 onClick={handleCancel}
@@ -103,13 +110,6 @@ export default function DealForm_Component() {
                 aria-label="Cancel creating a new deal and close the form"
               >
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                aria-label="Create a new deal with the entered client name, start date, and end date"
-              >
-                Create
               </button>
             </div>
           </form>

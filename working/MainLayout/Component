@@ -5,9 +5,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import SidebarNavigation from "./SidebarNavigation_Component";
 import ContentArea from "./ContentArea_Component";
-import DealForm from "./DealForm_Component";
 import DataRoomUpload from "./DataRoomUpload_Component";
-import DealList from "./DealList_Component";
 
 export default function MainLayout_Component() {
   return (
@@ -22,24 +20,41 @@ export default function MainLayout_Component() {
         {/* Right column: ContentArea */}
         <div className="w-full md:w-[calc(100%-250px)] md:ml-[250px] overflow-y-auto transition-all duration-300 ease-in-out">
           <Routes>
+            {/* Home route */}
             <Route path="/" element={<ContentArea />} />
+            
+            {/* Dashboard route */}
             <Route path="/dashboard" element={<ContentArea />} />
+            
+            {/* Data Room route with DataRoomUpload */}
             <Route path="/data-room" element={
               <>
                 <ContentArea />
                 <DataRoomUpload />
               </>
             } />
+            
+            {/* Document Status route */}
             <Route path="/document-status" element={<ContentArea />} />
+            
+            {/* Issue Tracker route */}
             <Route path="/issue-tracker" element={<ContentArea />} />
+            
+            {/* Users List route */}
             <Route path="/users-list" element={<ContentArea />} />
+            
+            {/* Data Chat route */}
             <Route path="/data-chat" element={<ContentArea />} />
+            
+            {/* FAQ route */}
             <Route path="/faq" element={<ContentArea />} />
-            <Route path="/create-deal" element={<DealForm />} />
+            
+            {/* Create Deal route */}
+            <Route path="/create-deal" element={<ContentArea />} />
+            
+            {/* Catch-all route for undefined paths */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-          {/* IMPORTANT: DealList is rendered here as part of the layout */}
-          <DealList />
         </div>
       </div>
     </Router>

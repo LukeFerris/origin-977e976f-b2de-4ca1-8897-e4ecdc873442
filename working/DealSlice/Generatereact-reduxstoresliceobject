@@ -25,13 +25,13 @@ export const fetchDeals = createAsyncThunk(
 function validateDeal(deal) {
   const errors = {};
   if (!deal.clientName || typeof deal.clientName !== 'string' || deal.clientName.trim() === '') {
-    errors.clientName = false;
+    errors.clientName = 'Invalid client name';
   }
   if (!deal.startDate || !(deal.startDate instanceof Date)) {
-    errors.startDate = false;
+    errors.startDate = 'Invalid start date';
   }
   if (!deal.endDate || !(deal.endDate instanceof Date)) {
-    errors.endDate = false;
+    errors.endDate = 'Invalid end date';
   }
   return errors;
 }
@@ -42,7 +42,11 @@ export const validateForm = createAsyncThunk(
   "deals/validateForm",
   async (formData) => {
     const validationResult = validateDeal(formData);
-    return validationResult;
+    return {
+      clientName: Object.keys(validationResult).includes('clientName') ? validationResult.clientName : null,
+      startDate: Object.keys(validationResult).includes('startDate') ? validationResult.startDate : null,
+      endDate: Object.keys(validationResult).includes('endDate') ? validationResult.endDate : null
+    };
   }
 );
 
@@ -53,7 +57,7 @@ export const createDeal = createAsyncThunk(
   async (newDeal, { dispatch, rejectWithValue }) => {
     try {
       const validationResult = await dispatch(validateForm(newDeal)).unwrap();
-      if (Object.values(validationResult).some(value => value === false)) {
+      if (Object.values(validationResult).some(value => value !== null)) {
         return rejectWithValue("Validation failed");
       }
 
@@ -94,11 +98,11 @@ const initialState = {
   deals: [],
   dealFormVisible: false,
   formValidation: {
-    clientName: true,
-    startDate: true,
-    endDate: true
+    clientName: null,
+    startDate: null,
+    endDate: null
   },
-  loading: false,
+  isLoading: false,
   error: null,
 };
 
@@ -109,32 +113,32 @@ const dealSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchDeals.pending, (state) => {
-        state.loading = true;
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(fetchDeals.fulfilled, (state, action) => {
-        state.loading = false;
+        state.isLoading = false;
         state.deals = action.payload;
       })
       .addCase(fetchDeals.rejected, (state, action) => {
-        state.loading = false;
+        state.isLoading = false;
         state.error = action.payload;
       })
       .addCase(createDeal.pending, (state) => {
-        state.loading = true;
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(createDeal.fulfilled, (state, action) => {
-        state.loading = false;
+        state.isLoading = false;
         state.deals.push(action.payload);
         state.formValidation = {
-          clientName: true,
-          startDate: true,
-          endDate: true
+          clientName: null,
+          startDate: null,
+          endDate: null
         };
       })
       .addCase(createDeal.rejected, (state, action) => {
-        state.loading = false;
+        state.isLoading = false;
         state.error = action.payload;
       })
       .addCase(setDealFormVisibility.fulfilled, (state, action) => {
@@ -144,10 +148,7 @@ const dealSlice = createSlice({
         // No additional state changes needed here
       })
       .addCase(validateForm.fulfilled, (state, action) => {
-        state.formValidation = {
-          ...state.formValidation,
-          ...action.payload
-        };
+        state.formValidation = action.payload;
       });
   },
 });
